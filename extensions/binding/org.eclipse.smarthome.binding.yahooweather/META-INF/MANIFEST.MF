@@ -7,6 +7,7 @@ Bundle-Version: 0.9.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: .
 Import-Package: com.google.common.collect,
+ javax.measure,
  org.apache.commons.lang,
  org.eclipse.jdt.annotation;resolution:=optional,
  org.eclipse.smarthome.binding.yahooweather,
@@ -14,11 +15,14 @@ Import-Package: com.google.common.collect,
  org.eclipse.smarthome.config.core,
  org.eclipse.smarthome.config.core.status,
  org.eclipse.smarthome.core.cache,
+ org.eclipse.smarthome.core.i18n,
  org.eclipse.smarthome.core.library.types,
  org.eclipse.smarthome.core.thing,
  org.eclipse.smarthome.core.thing.binding,
  org.eclipse.smarthome.core.types,
  org.eclipse.smarthome.io.net.http,
+ tec.uom.lib.common.function,
+ tec.uom.se.unit,
  org.slf4j
 Service-Component: OSGI-INF/*.xml
 Export-Package: org.eclipse.smarthome.binding.yahooweather,org.eclipse
