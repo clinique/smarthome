@@ -21,12 +21,16 @@ import java.util.Collection;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import javax.measure.Unit;
+import javax.measure.quantity.Pressure;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.smarthome.binding.yahooweather.internal.ExpiringCache;
 import org.eclipse.smarthome.config.core.Configuration;
 import org.eclipse.smarthome.config.core.status.ConfigStatusMessage;
 import org.eclipse.smarthome.core.library.types.DecimalType;
+import org.eclipse.smarthome.core.library.types.QuantityType;
 import org.eclipse.smarthome.core.thing.ChannelUID;
 import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.ThingStatus;
@@ -38,6 +42,8 @@ import org.eclipse.smarthome.core.types.State;
 import org.eclipse.smarthome.core.types.UnDefType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import tec.uom.se.unit.Units;
 
 /**
  * The {@link YahooWeatherHandler} is responsible for handling commands, which are
@@ -52,6 +58,7 @@ public class YahooWeatherHandler extends ConfigStatusThingHandler {
     private static final String LOCATION_PARAM = "location";
 
     private final Logger logger = LoggerFactory.getLogger(YahooWeatherHandler.class);
+    public static final Unit<Pressure> INCH_OF_MERCURY = Units.PASCAL.multiply(3386.388);
 
     private final int MAX_DATA_AGE = 3 * 60 * 60 * 1000; // 3h
     private final int CACHE_EXPIRY = 10 * 1000; // 10s
@@ -227,13 +234,16 @@ public class YahooWeatherHandler extends ConfigStatusThingHandler {
         if (weatherData != null) {
             String pressure = getValue(weatherData, "atmosphere", "pressure");
             if (pressure != null) {
-                DecimalType ret = new DecimalType(pressure);
-                if (ret.doubleValue() > 10000.0) {
+                double pressDouble = Double.parseDouble(pressure);
+
+                if (pressDouble > 10000.0) {
                     // Unreasonably high, record so far was 1085,8 hPa
                     // The Yahoo API currently returns inHg values although it claims they are mbar - therefore convert
-                    ret = new DecimalType(BigDecimal.valueOf((long) (ret.doubleValue() / 0.3386388158), 2));
+                    return new QuantityType(pressDouble, INCH_OF_MERCURY);
+                } else {
+                    return new QuantityType(pressDouble, tec.uom.se.unit.MetricPrefix.HECTO(Units.PASCAL));
                 }
-                return ret;
+
             }
         }
         return UnDefType.UNDEF;
@@ -243,7 +253,7 @@ public class YahooWeatherHandler extends ConfigStatusThingHandler {
         if (weatherData != null) {
             String temp = getValue(weatherData, "condition", "temp");
             if (temp != null) {
-                return new DecimalType(temp);
+                return new QuantityType(Double.parseDouble(temp), Units.CELSIUS);
             }
         }
         return UnDefType.UNDEF;

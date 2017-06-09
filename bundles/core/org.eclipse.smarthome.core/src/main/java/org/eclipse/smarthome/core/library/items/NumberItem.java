@@ -14,6 +14,7 @@ import java.util.List;
 import org.eclipse.smarthome.core.items.GenericItem;
 import org.eclipse.smarthome.core.library.CoreItemFactory;
 import org.eclipse.smarthome.core.library.types.DecimalType;
+import org.eclipse.smarthome.core.library.types.QuantityType;
 import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.RefreshType;
 import org.eclipse.smarthome.core.types.State;
@@ -36,9 +37,11 @@ public class NumberItem extends GenericItem {
     static {
         acceptedDataTypes.add(DecimalType.class);
         acceptedDataTypes.add(UnDefType.class);
+        acceptedDataTypes.add(QuantityType.class);
 
         acceptedCommandTypes.add(DecimalType.class);
         acceptedCommandTypes.add(RefreshType.class);
+        acceptedCommandTypes.add(QuantityType.class);
     }
 
     public NumberItem(String name) {
