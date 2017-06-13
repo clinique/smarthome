@@ -8,6 +8,8 @@
 package org.eclipse.smarthome.binding.yahooweather.handler;
 
 import static org.eclipse.smarthome.binding.yahooweather.YahooWeatherBindingConstants.*;
+import static tec.uom.se.unit.MetricPrefix.HECTO;
+import static tec.uom.se.unit.Units.*;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -23,6 +25,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.measure.Unit;
 import javax.measure.quantity.Pressure;
+import javax.measure.quantity.Temperature;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -52,19 +55,24 @@ import tec.uom.se.unit.Units;
  * @author Kai Kreuzer - Initial contribution
  * @author Stefan Bußweiler - Integrate new thing status handling
  * @author Thomas Höfer - Added config status provider
+ * @author Gaël L'hopital - Added usage of QuantityType
  */
 public class YahooWeatherHandler extends ConfigStatusThingHandler {
 
     private static final String LOCATION_PARAM = "location";
+    private static final String TEMPERATURE_UNIT_PARAM = "tempUnit";
 
     private final Logger logger = LoggerFactory.getLogger(YahooWeatherHandler.class);
-    public static final Unit<Pressure> INCH_OF_MERCURY = Units.PASCAL.multiply(3386.388);
+    public static final Unit<Pressure> INCH_OF_MERCURY = PASCAL.multiply(3386.388);
+    public static final Unit<Pressure> HECTO_PASCAL = HECTO(PASCAL);
+    public static final Unit<Temperature> FAHRENHEIT = CELSIUS.multiply(1.8).shift(-32);
 
     private final int MAX_DATA_AGE = 3 * 60 * 60 * 1000; // 3h
     private final int CACHE_EXPIRY = 10 * 1000; // 10s
     private long lastUpdateTime;
 
     private BigDecimal location;
+    private String tempUnit;
     private BigDecimal refresh;
 
     private String weatherData = null;
@@ -82,6 +90,7 @@ public class YahooWeatherHandler extends ConfigStatusThingHandler {
         Configuration config = getThing().getConfiguration();
 
         location = (BigDecimal) config.get(LOCATION_PARAM);
+        tempUnit = (String) config.get(TEMPERATURE_UNIT_PARAM);
 
         try {
             refresh = (BigDecimal) config.get("refresh");
@@ -231,6 +240,7 @@ public class YahooWeatherHandler extends ConfigStatusThingHandler {
     }
 
     private State getPressure() {
+        State ret = UnDefType.UNDEF;
         if (weatherData != null) {
             String pressure = getValue(weatherData, "atmosphere", "pressure");
             if (pressure != null) {
@@ -239,21 +249,26 @@ public class YahooWeatherHandler extends ConfigStatusThingHandler {
                 if (pressDouble > 10000.0) {
                     // Unreasonably high, record so far was 1085,8 hPa
                     // The Yahoo API currently returns inHg values although it claims they are mbar - therefore convert
-                    return new QuantityType(pressDouble, INCH_OF_MERCURY);
+                    ret = new QuantityType(pressDouble, INCH_OF_MERCURY);
                 } else {
-                    return new QuantityType(pressDouble, tec.uom.se.unit.MetricPrefix.HECTO(Units.PASCAL));
+                    ret = new QuantityType(pressDouble, HECTO_PASCAL);
+                    ret = new QuantityType(pressDouble, INCH_OF_MERCURY).toUnit(HECTO_PASCAL);
                 }
 
             }
         }
-        return UnDefType.UNDEF;
+        return ret;
     }
 
     private State getTemperature() {
         if (weatherData != null) {
             String temp = getValue(weatherData, "condition", "temp");
             if (temp != null) {
-                return new QuantityType(Double.parseDouble(temp), Units.CELSIUS);
+                QuantityType temperature = new QuantityType(Double.parseDouble(temp), Units.CELSIUS);
+                if (tempUnit.equalsIgnoreCase("1")) {
+                    temperature = temperature.toUnit(FAHRENHEIT);
+                }
+                return temperature;
             }
         }
         return UnDefType.UNDEF;
