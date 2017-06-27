@@ -8,6 +8,7 @@
 package org.eclipse.smarthome.core.thing.xml.internal;
 
 import java.util.List;
+
 import org.eclipse.smarthome.config.core.ConfigDescription;
 import org.eclipse.smarthome.config.core.ConfigDescriptionParameter;
 import org.eclipse.smarthome.config.core.ConfigDescriptionParameterGroup;
@@ -25,6 +26,7 @@ import org.eclipse.smarthome.config.xml.util.NodeValueConverter;
 import org.eclipse.smarthome.config.xml.util.XmlDocumentReader;
 import org.eclipse.smarthome.core.types.EventDescription;
 import org.eclipse.smarthome.core.types.StateDescription;
+
 import com.thoughtworks.xstream.XStream;
 
 /**
@@ -78,6 +80,7 @@ public class ThingDescriptionReader extends XmlDocumentReader<List<?>> {
         xstream.alias("supported-bridge-type-refs", NodeList.class);
         xstream.alias("bridge-type-ref", NodeAttributes.class);
         xstream.alias("item-type", NodeValue.class);
+        xstream.alias("dimension", NodeValue.class);
         xstream.alias("kind", NodeValue.class);
         xstream.alias("label", NodeValue.class);
         xstream.alias("description", NodeValue.class);
