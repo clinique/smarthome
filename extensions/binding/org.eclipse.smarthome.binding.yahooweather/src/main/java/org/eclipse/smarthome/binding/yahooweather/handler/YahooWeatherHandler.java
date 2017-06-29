@@ -8,8 +8,6 @@
 package org.eclipse.smarthome.binding.yahooweather.handler;
 
 import static org.eclipse.smarthome.binding.yahooweather.YahooWeatherBindingConstants.*;
-import static tec.uom.se.unit.MetricPrefix.HECTO;
-import static tec.uom.se.unit.Units.*;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -23,15 +21,12 @@ import java.util.Collection;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import javax.measure.Unit;
-import javax.measure.quantity.Pressure;
-import javax.measure.quantity.Temperature;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.smarthome.binding.yahooweather.internal.ExpiringCache;
 import org.eclipse.smarthome.config.core.Configuration;
 import org.eclipse.smarthome.config.core.status.ConfigStatusMessage;
+import org.eclipse.smarthome.core.i18n.UnitProvider;
 import org.eclipse.smarthome.core.library.types.DecimalType;
 import org.eclipse.smarthome.core.library.types.QuantityType;
 import org.eclipse.smarthome.core.thing.ChannelUID;
@@ -46,7 +41,6 @@ import org.eclipse.smarthome.core.types.UnDefType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import tec.uom.se.unit.Units;
 
 /**
  * The {@link YahooWeatherHandler} is responsible for handling commands, which are
@@ -62,9 +56,6 @@ public class YahooWeatherHandler extends ConfigStatusThingHandler {
     private static final String LOCATION_PARAM = "location";
 
     private final Logger logger = LoggerFactory.getLogger(YahooWeatherHandler.class);
-    public static final Unit<Pressure> INCH_OF_MERCURY = PASCAL.multiply(3386.388);
-    public static final Unit<Pressure> HECTO_PASCAL = HECTO(PASCAL);
-    public static final Unit<Temperature> FAHRENHEIT = CELSIUS.multiply(1.8).shift(-32);
 
     private final int MAX_DATA_AGE = 3 * 60 * 60 * 1000; // 3h
     private final int CACHE_EXPIRY = 10 * 1000; // 10s
@@ -115,7 +106,7 @@ public class YahooWeatherHandler extends ConfigStatusThingHandler {
                 if (success) {
                     updateState(new ChannelUID(getThing().getUID(), CHANNEL_TEMPERATURE), getTemperature());
                     updateState(new ChannelUID(getThing().getUID(), CHANNEL_HUMIDITY), getHumidity());
-                    updateState(new ChannelUID(getThing().getUID(), CHANNEL_PRESSURE), getPressure());
+                    updateState(new ChannelUID(getThing().getUID(), CHANNEL_PRESSURE), getPressure());                    
                 }
             } catch (Exception e) {
                 logger.debug("Exception occurred during execution: {}", e.getMessage(), e);
@@ -246,10 +237,9 @@ public class YahooWeatherHandler extends ConfigStatusThingHandler {
                 if (pressDouble > 10000.0) {
                     // Unreasonably high, record so far was 1085,8 hPa
                     // The Yahoo API currently returns inHg values although it claims they are mbar - therefore convert
-                    ret = new QuantityType(pressDouble, INCH_OF_MERCURY);
+                    ret = new QuantityType(pressDouble, UnitProvider.INCH_OF_MERCURY);
                 } else {
-                    ret = new QuantityType(pressDouble, HECTO_PASCAL);
-                    ret = new QuantityType(pressDouble, INCH_OF_MERCURY).toUnit(HECTO_PASCAL);
+                    ret = new QuantityType(pressDouble, UnitProvider.HECTO_PASCAL);
                 }
 
             }
@@ -261,7 +251,7 @@ public class YahooWeatherHandler extends ConfigStatusThingHandler {
         if (weatherData != null) {
             String temp = getValue(weatherData, "condition", "temp");
             if (temp != null) {
-                QuantityType temperature = new QuantityType(Double.parseDouble(temp), Units.CELSIUS);
+                QuantityType temperature = new QuantityType(Double.parseDouble(temp), UnitProvider.CELSIUS);
                 return temperature;
             }
         }

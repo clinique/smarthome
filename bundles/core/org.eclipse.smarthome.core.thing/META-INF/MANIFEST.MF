@@ -8,6 +8,7 @@ Bundle-License: http://www.eclipse.org/legal/epl-v10.html
 Bundle-SymbolicName: org.eclipse.smarthome.core.thing
 Import-Package: com.google.common.base,
  com.google.common.collect,
+ javax.measure,
  org.apache.commons.collections.iterators,
  org.apache.commons.io,
  org.apache.commons.lang,
@@ -40,7 +41,11 @@ Import-Package: com.google.common.base,
  org.osgi.service.component,
  org.osgi.service.event,
  org.osgi.util.tracker,
- org.slf4j
+ org.slf4j,
+ tec.uom.lib.common.function,
+ tec.uom.se,
+ tec.uom.se.quantity,
+ tec.uom.se.unit
 Export-Package: org.eclipse.smarthome.core.thing,
  org.eclipse.smarthome.core.thing.binding,
  org.eclipse.smarthome.core.thing.binding.builder,
