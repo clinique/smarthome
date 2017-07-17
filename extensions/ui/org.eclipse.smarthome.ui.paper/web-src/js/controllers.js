@@ -102,6 +102,7 @@ angular.module('PaperUI.controllers', [ 'PaperUI.constants' ]).controller('BodyC
                     } else {
                         state = parsedValue;
                     }
+                    item.unit = stateObject.stateMap['unit']
                 }
                 if (item.type === "Rollershutter") {
                     if (stateObject.type == "Percent" || stateObject.type == "Decimal") {

@@ -141,4 +141,5 @@ public interface Item {
      * @return state description (can be null)
      */
     public StateDescription getStateDescription(Locale locale);
+
 }

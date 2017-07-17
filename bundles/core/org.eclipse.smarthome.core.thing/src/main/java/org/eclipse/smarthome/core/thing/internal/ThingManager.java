@@ -28,8 +28,6 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import javax.measure.Unit;
-
 import org.eclipse.smarthome.config.core.BundleProcessor;
 import org.eclipse.smarthome.config.core.BundleProcessorVetoManager;
 import org.eclipse.smarthome.config.core.ConfigDescription;
@@ -47,7 +45,6 @@ import org.eclipse.smarthome.core.items.events.AbstractItemEventSubscriber;
 import org.eclipse.smarthome.core.items.events.ItemCommandEvent;
 import org.eclipse.smarthome.core.items.events.ItemEventFactory;
 import org.eclipse.smarthome.core.items.events.ItemStateEvent;
-import org.eclipse.smarthome.core.library.types.QuantityType;
 import org.eclipse.smarthome.core.thing.Bridge;
 import org.eclipse.smarthome.core.thing.Channel;
 import org.eclipse.smarthome.core.thing.ChannelUID;
@@ -67,8 +64,6 @@ import org.eclipse.smarthome.core.thing.binding.builder.ThingStatusInfoBuilder;
 import org.eclipse.smarthome.core.thing.events.ThingEventFactory;
 import org.eclipse.smarthome.core.thing.i18n.ThingStatusInfoI18nLocalizationService;
 import org.eclipse.smarthome.core.thing.link.ItemChannelLinkRegistry;
-import org.eclipse.smarthome.core.thing.type.ChannelDimension;
-import org.eclipse.smarthome.core.thing.type.ChannelType;
 import org.eclipse.smarthome.core.thing.type.ThingType;
 import org.eclipse.smarthome.core.thing.type.ThingTypeRegistry;
 import org.eclipse.smarthome.core.thing.util.ThingHandlerHelper;
@@ -133,25 +128,6 @@ public class ThingManager extends AbstractItemEventSubscriber implements ThingTr
 
         @Override
         public void stateUpdated(ChannelUID channelUID, State state) {
-            Channel channel = thingRegistry.getChannel(channelUID);
-            ChannelType channelType = thingTypeRegistry.getChannelType(channel);
-            ChannelDimension channelDimension = channelType.getDimension();
-            if (channelDimension != null) {
-                if (state instanceof QuantityType) {
-                    QuantityType quantityState = (QuantityType) state;
-                    ChannelDimension stateDimension = ChannelDimension.fromUnit(quantityState.getUnit());
-
-                    if (channelDimension == stateDimension) {
-                        Unit<?> systemUnit = ChannelDimension.getDefaultUnit(channelDimension);
-                        if (quantityState.getUnit() != systemUnit) {
-                            state = quantityState.toUnit(systemUnit);
-                        }
-
-                    } else {
-                        logger.error("Incompatible dimension for state {} assigned to channel {}", state, channelUID);
-                    }
-                }
-            }
             Set<Item> items = itemChannelLinkRegistry.getLinkedItems(channelUID);
             for (Item item : items) {
                 State acceptedState = ItemUtil.convertToAcceptedState(state, item);
