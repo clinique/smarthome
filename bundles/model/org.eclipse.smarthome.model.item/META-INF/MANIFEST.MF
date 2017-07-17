@@ -45,5 +45,6 @@ Import-Package: org.apache.commons.lang,
  org.eclipse.smarthome.model.core,
  org.eclipse.xtext.xbase.lib,
  org.osgi.framework,
- org.slf4j
+ org.slf4j,
+ javax.measure
 Service-Component: OSGI-INF/*.xml
