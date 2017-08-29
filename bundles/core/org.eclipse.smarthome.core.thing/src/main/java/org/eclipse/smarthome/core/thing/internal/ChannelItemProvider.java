@@ -264,6 +264,7 @@ public class ChannelItemProvider implements ItemProvider {
             if (item instanceof NumberItem && getChannelType(channel).getDimension() != null) {
                 ((NumberItem) item).setDimension(getChannelType(channel).getDimension());
             }
+
             if (item != null) {
                 items.put(item.getName(), item);
                 for (ProviderChangeListener<Item> listener : listeners) {
